@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة مستر أحمد هشام للبرمجة</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --guest: #64748b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 { text-align: center; color: var(--dark); }
+        .section { display: none; }
+        .section.active { display: block; }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { opacity: 0.9; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-success { background-color: var(--success); }
+        .btn-guest { background-color: var(--guest); }
+        .nav-btns { display: flex; gap: 10px; margin-bottom: 20px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: var(--dark); color: white; }
+        .video-box {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        video { width: 100%; max-height: 450px; display: block; }
+        .watermark {
+            position: absolute;
+            top: 20%;
+            left: 30%;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 20px;
+            pointer-events: none;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="container">
+    <h1>منصة مستر أحمد هشام للبرمجة 💻</h1>
+
+    <div class="nav-btns">
+        <button onclick="showSection('student-auth')">دخول الطالب</button>
+        <button onclick="showSection('admin-login')">دخول الأدمن</button>
+        <button onclick="showSection('dev-login')">دخول المطور</button>
+    </div>
+
+    <!-- 1. تسجيل الطالب / الضيف -->
+    <div id="student-auth" class="section active">
+        <h2>تسجيل دخول الطالب / الضيف</h2>
+        <input type="text" id="st-name" placeholder="اسم الطالب">
+        <input type="text" id="st-father" placeholder="اسم الأب">
+        <input type="text" id="st-grand" placeholder="اسم الجد">
+        <input type="text" id="st-id" placeholder="رقم الطالب">
+        <input type="text" id="st-parent-phone" placeholder="رقم ولي الأمر">
+        <button onclick="registerStudent()">تسجيل ودخول المنصة</button>
+
+        <!-- زر دخول الضيف المضاف -->
+        <button class="btn-guest" onclick="loginAsGuest()">دخول سريع كضيف 👤</button>
+
+        <div id="student-dashboard" style="display:none; margin-top:20px;">
+            <h3>المحتوى التعليمي المتاح</h3>
+            <div id="student-video-list"></div>
+            <hr>
+            <h3>اختبارات مرفوعة</h3>
+            <div id="student-tests-list"></div>
+            <button class="btn-success" onclick="contactSupport('student')">التواصل مع الدعم</button>
+        </div>
+    </div>
+
+    <!-- 2. دخول الأدمن -->
+    <div id="admin-login" class="section">
+        <h2>دخول الأدمن</h2>
+        <input type="password" id="admin-pass" placeholder="رمز دخول الأدمن">
+        <button onclick="loginAdmin()">دخول</button>
+
+        <div id="admin-dashboard" style="display:none; margin-top:20px;">
+            <h2>لوحة تحكم الأدمن</h2>
+            <h3>إضافة فيديو جديد وتوليد أكواد</h3>
+            <input type="text" id="vid-title" placeholder="عنوان الفيديو">
+            <input type="file" id="vid-file" accept="video/*">
+            <input type="number" id="code-count" placeholder="عدد الأكواد المطلوب توليدها">
+            <button onclick="uploadVideo()">رفع الفيديو وتوليد الأكواد</button>
+
+            <hr>
+            <h3>رفع اختبار للطالب</h3>
+            <input type="text" id="test-title" placeholder="عنوان الاختبار">
+            <input type="file" id="test-file">
+            <button onclick="uploadTest()">رفع الاختبار</button>
+
+            <hr>
+            <h3>سجلات دخول الطلاب والضيوف</h3>
+            <table id="logs-table">
+                <thead>
+                    <tr><th>الاسم الكامل</th><th>رقم الطالب / المعرف</th><th>رقم ولي الأمر</th><th>وقت الدخول</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. دخول المطور -->
+    <div id="dev-login" class="section">
+        <h2>دخول المطور</h2>
+        <input type="password" id="dev-pass" placeholder="رمز دخول المطور">
+        <button onclick="loginDev()">دخول</button>
+
+        <div id="dev-dashboard" style="display:none; margin-top:20px;">
+            <h2>لوحة المطور - التحكم بالنظام والأكواد</h2>
+            <h3>إدارة المحظورين والطلاب</h3>
+            <table id="dev-students-table">
+                <thead>
+                    <tr><th>رقم الطالب</th><th>الاسم</th><th>أخطاء الكود</th><th>الحالة</th><th>التحكم</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <hr>
+            <h3>التحكم بالأكواد الموّلدة</h3>
+            <div id="dev-codes-list"></div>
+
+            <button class="btn-success" onclick="contactSupport('dev')">تواصل المطور مع الدعم</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_CODE = "009988776655";
+    const DEV_CODE = "556677889900";
+    const TEACHER_PHONE = "01214852909";
+    const DEV_PHONE = "01515227741";
+
+    let db = {
+        students: JSON.parse(localStorage.getItem('db_students')) || [],
+        logs: JSON.parse(localStorage.getItem('db_logs')) || [],
+        videos: JSON.parse(localStorage.getItem('db_videos')) || [],
+        tests: JSON.parse(localStorage.getItem('db_tests')) || [],
+        codes: JSON.parse(localStorage.getItem('db_codes')) || []
+    };
+
+    function saveData() {
+        localStorage.setItem('db_students', JSON.stringify(db.students));
+        localStorage.setItem('db_logs', JSON.stringify(db.logs));
+        localStorage.setItem('db_videos', JSON.stringify(db.videos));
+        localStorage.setItem('db_tests', JSON.stringify(db.tests));
+        localStorage.setItem('db_codes', JSON.stringify(db.codes));
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    let currentStudent = null;
+
+    // دالة دخول الضيف الجديدة
+    function loginAsGuest() {
+        const guestId = "GUEST-" + Math.floor(1000 + Math.random() * 9000);
+
+        let guestUser = {
+            id: guestId,
+            fullName: "زائر / ضيف",
+            parentPhone: "غير مسجل",
+            failedAttempts: 0,
+            isBanned: false,
+            isGuest: true
+        };
+
+        currentStudent = guestUser;
+        db.logs.push({
+            name: guestUser.fullName,
+            id: guestUser.id,
+            parentPhone: guestUser.parentPhone,
+            date: new Date().toLocaleString()
+        });
+        saveData();
+
+        document.getElementById('student-dashboard').style.display = 'block';
+        renderStudentVideos();
+        renderStudentTests();
+        alert(`تم دخولك كضيف بالمعرف: ${guestId}`);
+    }
+
+    function registerStudent() {
+        const name = document.getElementById('st-name').value;
+        const father = document.getElementById('st-father').value;
+        const grand = document.getElementById('st-grand').value;
+        const id = document.getElementById('st-id').value;
+        const parentPhone = document.getElementById('st-parent-phone').value;
+
+        if(!name || !id) return alert("يرجى إدخال البيانات الأساسية!");
+
+        let student = db.students.find(s => s.id === id);
+        if(!student) {
+            student = { id, fullName: `${name} ${father} ${grand}`, parentPhone, failedAttempts: 0, isBanned: false, isGuest: false };
+            db.students.push(student);
+        }
+
+        if(student.isBanned) {
+            return alert("تم حظر هذا الطالب لتجاوز عدد محاولات إدخال الكود الخاطئة!");
+        }
+
+        currentStudent = student;
+        db.logs.push({ name: student.fullName, id: student.id, parentPhone: student.parentPhone, date: new Date().toLocaleString() });
+        saveData();
+
+        document.getElementById('student-dashboard').style.display = 'block';
+        renderStudentVideos();
+        renderStudentTests();
+    }
+
+    function renderStudentVideos() {
+        const container = document.getElementById('student-video-list');
+        container.innerHTML = "";
+        db.videos.forEach((vid, idx) => {
+            container.innerHTML += `
+                <div class="card">
+                    <h4>${vid.title}</h4>
+                    <input type="text" id="code-input-${idx}" placeholder="أدخل كود مشاهدة الفيديو">
+                    <button onclick="unlockVideo(${idx})">ابدأ التعلم</button>
+                    <div id="video-player-${idx}" style="display:none;" class="video-box">
+                        <div class="watermark">${currentStudent.fullName} - ${currentStudent.id}</div>
+                        <video id="vid-elem-${idx}" controls controlsList="nodownload">
+                            <source src="${vid.src}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function unlockVideo(idx) {
+        if(currentStudent.isBanned) return alert("حسابك محظور!");
+
+        const inputCode = document.getElementById(`code-input-${idx}`).value;
+        const validCode = db.codes.find(c => c.code === inputCode && c.videoId === idx && !c.used);
+
+        if(validCode) {
+            alert("تم التحقق بنجاح! جاري عرض الفيديو...");
+            validCode.used = true;
+            saveData();
+            document.getElementById(`video-player-${idx}`).style.display = 'block';
+        } else {
+            currentStudent.failedAttempts++;
+            if(currentStudent.failedAttempts >= 10) {
+                currentStudent.isBanned = true;
+                alert("تم حظرك لإدخال كود خاطئ أكثر من 10 مرات!");
+            } else {
+                alert(`كود خاطئ! المحاولات المتبقية: ${10 - currentStudent.failedAttempts}`);
+            }
+            saveData();
+        }
+    }
+
+    function renderStudentTests() {
+        const container = document.getElementById('student-tests-list');
+        container.innerHTML = "";
+        db.tests.forEach(t => {
+            container.innerHTML += `<div class="card"><a href="${t.src}" download="${t.title}">${t.title} (تحميل الاختبار)</a></div>`;
+        });
+    }
+
+    function loginAdmin() {
+        if(document.getElementById('admin-pass').value === ADMIN_CODE) {
+            document.getElementById('admin-dashboard').style.display = 'block';
+            renderLogs();
+        } else {
+            alert("رمز دخول الأدمن غير صحيح!");
+        }
+    }
+
+    function uploadVideo() {
+        const title = document.getElementById('vid-title').value;
+        const file = document.getElementById('vid-file').files[0];
+        const count = parseInt(document.getElementById('code-count').value);
+
+        if(!title || !file || !count) return alert("أكمل بيانات الفيديو والأكواد!");
+
+        const videoUrl = URL.createObjectURL(file);
+        const videoId = db.videos.length;
+        db.videos.push({ title, src: videoUrl });
+
+        for(let i = 0; i < count; i++) {
+            const generatedCode = "HISHAM-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            db.codes.push({ code: generatedCode, videoId, used: false });
+        }
+
+        saveData();
+        alert(`تم رفع الفيديو بنجاح وتوليد ${count} كود!`);
+    }
+
+    function uploadTest() {
+        const title = document.getElementById('test-title').value;
+        const file = document.getElementById('test-file').files[0];
+        if(!title || !file) return alert("اختر الملف واكتب العنوان!");
+
+        const testUrl = URL.createObjectURL(file);
+        db.tests.push({ title, src: testUrl });
+        saveData();
+        alert("تم رفع الاختبار بنجاح!");
+    }
+
+    function renderLogs() {
+        const tbody = document.querySelector('#logs-table tbody');
+        tbody.innerHTML = "";
+        db.logs.forEach(l => {
+            tbody.innerHTML += `<tr><td>${l.name}</td><td>${l.id}</td><td>${l.parentPhone}</td><td>${l.date}</td></tr>`;
+        });
+    }
+
+    function loginDev() {
+        if(document.getElementById('dev-pass').value === DEV_CODE) {
+            document.getElementById('dev-dashboard').style.display = 'block';
+            renderDevData();
+        } else {
+            alert("رمز دخول المطور غير صحيح!");
+        }
+    }
+
+    function renderDevData() {
+        const tbody = document.querySelector('#dev-students-table tbody');
+        tbody.innerHTML = "";
+        db.students.forEach(s => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.fullName}</td>
+                    <td>${s.failedAttempts}</td>
+                    <td>${s.isBanned ? 'محظور' : 'نشط'}</td>
+                    <td>
+                        <button class="btn-danger" onclick="toggleBan('${s.id}', true)">حظر</button>
+                        <button class="btn-success" onclick="toggleBan('${s.id}', false)">فك الحظر</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        const codesDiv = document.getElementById('dev-codes-list');
+        codesDiv.innerHTML = "<h4>الأكواد المتاحة للنظام:</h4>";
+        db.codes.forEach(c => {
+            codesDiv.innerHTML += `<p>كود: <b>${c.code}</b> | مستخدم: ${c.used ? 'نعم' : 'لا'}</p>`;
+        });
+    }
+
+    function toggleBan(studentId, status) {
+        let student = db.students.find(s => s.id === studentId);
+        if(student) {
+            student.isBanned = status;
+            if(!status) student.failedAttempts = 0;
+            saveData();
+            renderDevData();
+            alert("تم تحديث حالة الطالب!");
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === "PrintScreen" || (e.ctrlKey && e.key === 'p') || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+            alert("غير مسموح بأخذ لقطات شاشة أو فتح أدوات المطور للحفاظ على حقوق الملكية!");
+            e.preventDefault();
+        }
+    });
+
+    function contactSupport(role) {
+        const msg = encodeURIComponent(`مرحباً، أود التواصل مع دعم منصة مستر أحمد هشام للبرمجة`);
+        window.open(`https://wa.me/201214852909?text=${msg}`, '_blank');
+    }
+</script>
+</body>
+</html>
